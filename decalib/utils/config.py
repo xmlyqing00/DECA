@@ -5,7 +5,9 @@ from yacs.config import CfgNode as CN
 import argparse
 import yaml
 import os
+from functools import partial
 
+CN = partial(CN, new_allowed=True)
 cfg = CN()
 
 abs_deca_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -83,6 +85,11 @@ cfg.train.val_steps = 500
 cfg.train.val_vis_dir = 'val_images'
 cfg.train.eval_steps = 5000
 cfg.train.resume = True
+# cfg for gan
+cfg.train.gan = False
+cfg.train.G_lr = 1e-4
+cfg.train.D_lr = 1e-4
+cfg.train.lmk_scale = 20
 
 # ---------------------------------------------------------------------------- #
 # Options for Losses

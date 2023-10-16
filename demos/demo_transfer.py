@@ -38,6 +38,7 @@ def main(args):
     # run DECA
     deca_cfg.model.use_tex = args.useTex
     deca_cfg.rasterizer_type = args.rasterizer_type
+    deca_cfg.model.extract_tex = args.extractTex
     deca = DECA(config = deca_cfg, device=device)
     # identity reference
     i = 0
@@ -83,6 +84,7 @@ def main(args):
         if args.saveObj:
             deca.save_obj(os.path.join(savefolder, name, save_type, name + '.obj'), opdict)
         if args.saveMat:
+            from scipy.io import savemat
             opdict = util.dict_tensor2npy(opdict)
             savemat(os.path.join(savefolder, name, save_type, name + '.mat'), opdict)
         if args.saveImages:
@@ -116,6 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('--useTex', default=False, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to use FLAME texture model to generate uv texture map, \
                             set it to True only if you downloaded texture model' )
+    parser.add_argument('--extractTex', default=True, type=lambda x: x.lower() in ['true', '1'], help='whether to extract texture from input image as the uv texture map, set false if you want albeo map from FLAME mode' )
     parser.add_argument('--saveVis', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save visualization of output' )
     parser.add_argument('--saveKpt', default=False, type=lambda x: x.lower() in ['true', '1'],

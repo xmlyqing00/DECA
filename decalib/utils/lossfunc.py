@@ -673,3 +673,6 @@ class VGGFace2Loss(nn.Module):
         # loss = ((gen_out - tar_out)**2).mean()
         loss = self._cos_metric(gen_out, tar_out).mean()
         return loss
+    
+    def forward_features(self, x):
+        return self.reg_features(self.transform(x))
