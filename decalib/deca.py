@@ -308,7 +308,7 @@ class DECA(nn.Module):
         util.write_obj(filename.replace('.obj', '_detail.obj'), 
                         dense_vertices, 
                         dense_faces,
-                        colors = dense_colors / 255.,
+                        colors = dense_colors,
                         inverse_face_order=True)
     
     def run(self, imagepath, iscrop=True):
