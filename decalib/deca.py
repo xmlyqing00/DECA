@@ -79,7 +79,7 @@ class DECA(nn.Module):
         self.E_detail = ResnetEncoder(outsize=self.n_detail).to(self.device)
         # decoders
         self.flame = FLAME(model_cfg).to(self.device)
-        print(model_cfg)
+        # print(model_cfg)
         if model_cfg.use_tex:
             self.flametex = FLAMETex(model_cfg).to(self.device)
         self.D_detail = Generator(latent_dim=self.n_detail+self.n_cond, out_channels=1, out_scale=model_cfg.max_z, sample_mode = 'bilinear').to(self.device)
@@ -94,7 +94,7 @@ class DECA(nn.Module):
             util.copy_state_dict(self.D_detail.state_dict(), checkpoint['D_detail'])
         else:
             print(f'please check model path: {model_path}')
-            # exit()
+            # exit() 
         # eval mode
         self.E_flame.eval()
         self.E_detail.eval()
@@ -241,6 +241,7 @@ class DECA(nn.Module):
                 ## TODO: poisson blending should give better-looking results
                 if self.cfg.model.extract_tex:
                     uv_texture_gt = uv_gt[:,:3,:,:]*self.uv_face_eye_mask + (uv_texture[:,:3,:,:]*(1-self.uv_face_eye_mask))
+                    # uv_texture_gt = self.mean_texture*self.uv_face_eye_mask + (uv_texture[:,:3,:,:]*(1-self.uv_face_eye_mask))
                 else:
                     uv_texture_gt = uv_texture[:,:3,:,:]
             else:
@@ -307,7 +308,7 @@ class DECA(nn.Module):
         util.write_obj(filename.replace('.obj', '_detail.obj'), 
                         dense_vertices, 
                         dense_faces,
-                        colors = dense_colors,
+                        colors = dense_colors / 255.,
                         inverse_face_order=True)
     
     def run(self, imagepath, iscrop=True):
