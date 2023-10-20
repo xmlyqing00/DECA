@@ -159,7 +159,7 @@ class DECA(nn.Module):
 
     # @torch.no_grad()
     def decode(self, codedict, rendering=True, iddict=None, vis_lmk=True, return_vis=True, use_detail=True,
-                render_orig=False, original_image=None, tform=None):
+                render_orig=False, original_image=None, tform=None, neutral_pose=False):
         images = codedict['images']
         batch_size = images.shape[0]
         
@@ -182,6 +182,11 @@ class DECA(nn.Module):
             'landmarks3d': landmarks3d,
             'landmarks3d_world': landmarks3d_world,
         }
+
+        if neutral_pose:
+            neutral_pose_code = torch.zeros_like(codedict['pose'])
+            neutral_pose_verts, _, _ = self.flame(shape_params=codedict['shape'], expression_params=codedict['exp'], pose_params=neutral_pose_code)
+            opdict['neutral_pose_verts'] = neutral_pose_verts
 
         ## rendering
         if return_vis and render_orig and original_image is not None and tform is not None:
@@ -300,6 +305,19 @@ class DECA(nn.Module):
                         uvcoords=uvcoords, 
                         uvfaces=uvfaces, 
                         normal_map=normal_map)
+        
+        if opdict.get('neutral_pose_verts') is not None:
+            neutral_pose_verts = opdict['neutral_pose_verts'][i].cpu().numpy()
+            util.write_obj(
+                filename.replace('.obj', '_neutralpose.obj'), 
+                neutral_pose_verts, 
+                faces,
+                texture=texture, 
+                uvcoords=uvcoords, 
+                uvfaces=uvfaces, 
+                normal_map=normal_map
+            )
+
         # upsample mesh, save detailed mesh
         texture = texture[:,:,[2,1,0]]
         normals = opdict['normals'][i].cpu().numpy()
@@ -310,6 +328,17 @@ class DECA(nn.Module):
                         dense_faces,
                         colors = dense_colors,
                         inverse_face_order=True)
+        
+        if opdict.get('neutral_pose_verts') is not None:
+
+            dense_vertices, dense_colors, dense_faces = util.upsample_mesh(neutral_pose_verts, normals, faces, displacement_map, texture, self.dense_template)
+            util.write_obj(
+                filename.replace('.obj', '_neutralpose_detail.obj'), 
+                dense_vertices, 
+                dense_faces,
+                colors = dense_colors,
+                inverse_face_order=True
+            )
     
     def run(self, imagepath, iscrop=True):
         ''' An api for running deca given an image path
