@@ -355,3 +355,21 @@ class DECA(nn.Module):
             'E_detail': self.E_detail.state_dict(),
             'D_detail': self.D_detail.state_dict()
         }
+
+    def get_dense_pc(self, opdict):
+        i = 0
+        vertices = opdict['verts'][i].cpu().numpy()
+        faces = self.render.faces[0].cpu().numpy()
+        texture = util.tensor2image(opdict['uv_texture_gt'][i])        
+        
+        texture = texture[:,:,[2,1,0]]
+        normals = opdict['normals'][i].cpu().numpy()
+        displacement_map = opdict['displacement_map'][i].cpu().detach().numpy().squeeze()
+        dense_vertices, dense_colors, dense_faces = util.upsample_mesh(vertices, normals, faces, displacement_map, texture, self.dense_template)\
+        
+        uvcoord_idx = self.dense_template['valid_pixel_ids']
+        uvcoord_x = self.dense_template['x_coords'][uvcoord_idx].astype(int)
+        uvcoord_y = self.dense_template['y_coords'][uvcoord_idx].astype(int)
+
+        return uvcoord_x, uvcoord_y, dense_vertices, uvcoord_idx
+        
