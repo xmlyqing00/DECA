@@ -326,7 +326,7 @@ class DECA(nn.Module):
         util.write_obj(filename.replace('.obj', '_detail.obj'), 
                         dense_vertices, 
                         dense_faces,
-                        colors = dense_colors,
+                        colors = dense_colors/255.0,
                         inverse_face_order=True)
         
         if opdict.get('neutral_pose_verts') is not None:
@@ -336,9 +336,17 @@ class DECA(nn.Module):
                 filename.replace('.obj', '_neutralpose_detail.obj'), 
                 dense_vertices, 
                 dense_faces,
-                colors = dense_colors,
+                colors = dense_colors/255.0,
                 inverse_face_order=True
             )
+
+            opdict_export = {
+                'texture': texture,
+                'normals': normals,
+                'displacement_map': displacement_map,
+            }
+
+            np.save(filename.replace('.obj', '_detail.npy'), opdict_export) 
     
     def run(self, imagepath, iscrop=True):
         ''' An api for running deca given an image path
