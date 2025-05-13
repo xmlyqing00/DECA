@@ -87,7 +87,7 @@ class DECA(nn.Module):
         model_path = self.cfg.pretrained_modelpath
         if os.path.exists(model_path):
             print(f'trained model found. load {model_path}')
-            checkpoint = torch.load(model_path)
+            checkpoint = torch.load(model_path, weights_only=True)
             self.checkpoint = checkpoint
             util.copy_state_dict(self.E_flame.state_dict(), checkpoint['E_flame'])
             util.copy_state_dict(self.E_detail.state_dict(), checkpoint['E_detail'])
@@ -159,7 +159,7 @@ class DECA(nn.Module):
 
     # @torch.no_grad()
     def decode(self, codedict, rendering=True, iddict=None, vis_lmk=True, return_vis=True, use_detail=True,
-                render_orig=False, original_image=None, tform=None, neutral_pose=False):
+                render_orig=False, original_image=None, tform=None, neutral_pose=False, neutral_face=False):
         images = codedict['images']
         batch_size = images.shape[0]
         
@@ -182,6 +182,12 @@ class DECA(nn.Module):
             'landmarks3d': landmarks3d,
             'landmarks3d_world': landmarks3d_world,
         }
+
+        if neutral_face:
+            codedict['shape'] = torch.zeros_like(codedict['shape'])
+            codedict['exp'] = torch.zeros_like(codedict['exp'])
+            codedict['detail'] = torch.zeros_like(codedict['detail'])
+            codedict['tex'] = torch.zeros_like(codedict['tex'])
 
         if neutral_pose:
             neutral_pose_code = torch.zeros_like(codedict['pose'])
